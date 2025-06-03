@@ -1,5 +1,5 @@
 # EasySM
-EasySM is a lightweight state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS (Robot Operating System) integration.
+EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS (Robot Operating System) integration.
 
 # Installation
 
