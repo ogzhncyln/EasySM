@@ -18,7 +18,7 @@ namespace easysm
         if(!checkStateExists(state->getName())) 
         {
             states.push_back(state);
-            state->state_manager = shared_from_this(); // Set the StateManager for the state
+            state->state_manager = shared_from_this(); 
             return;
         }
 
@@ -29,8 +29,8 @@ namespace easysm
         if(!checkTransitionExists(transition->getName())) 
         {
             transitions.push_back(transition);
-            transition->state_manager = shared_from_this(); // Set the StateManager for the transition
-            transition->initialize(); // Initialize the transition to set up connections
+            transition->state_manager = shared_from_this(); 
+            transition->initialize(); 
             return;
         }
 
@@ -112,7 +112,7 @@ namespace easysm
     void State::execute() 
     {
         state_manager->executeFeedback(name); 
-        std::string event = onExecute(); // Call the pure virtual function to execute state logic
+        std::string event = onExecute(); 
         std::shared_ptr<Transition> transition = getTransitionFromEvent(event);
 
         if (transition) 
