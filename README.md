@@ -6,7 +6,7 @@ EasySM is a simple state management library for C++ applications that provides a
 ## Standard Installation (without ROS)
 1. Clone the repository:
 <pre>git clone https://github.com/ogzhncyln/EasySM.git
-cd easysm</pre>
+cd EasySM</pre>
     
 2. Create build directory and build the library:
 <pre>mkdir build && cd build
@@ -19,7 +19,7 @@ make</pre>
 ## Installation with ROS Support
 1. Clone the repository:
 <pre>git clone https://github.com/ogzhncyln/EasySM.git
-cd easysm</pre>
+cd EasySM</pre>
     
 2. Create build directory and build the library:
 <pre>mkdir build && cd build
@@ -143,6 +143,10 @@ The execution flow is:
 * If > 5: returns "stop", triggering Transition3 to State3
 * State3 outputs completion message and returns "completed"
 * No transition is defined for "completed", so the state machine terminates
+
+### Example Diagram
+  ![easysm_diagram](https://github.com/user-attachments/assets/9b943a21-ecab-4288-b62f-d733bd4c0f6f)
+
 
 # Using Without ROS
 If you don't need ROS integration, you can use the DefaultStateManager:
