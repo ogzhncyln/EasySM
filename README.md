@@ -6,7 +6,7 @@ EasySM is a simple state management library for C++ applications that provides a
 ## Standard Installation (without ROS)
 1. Clone the repository:
 <pre>git clone https://github.com/ogzhncyln/EasySM.git
-cd easysm</pre>
+cd EasySM</pre>
     
 2. Create build directory and build the library:
 <pre>mkdir build && cd build
@@ -19,7 +19,7 @@ make</pre>
 ## Installation with ROS Support
 1. Clone the repository:
 <pre>git clone https://github.com/ogzhncyln/EasySM.git
-cd easysm</pre>
+cd EasySM</pre>
     
 2. Create build directory and build the library:
 <pre>mkdir build && cd build
