@@ -144,6 +144,10 @@ The execution flow is:
 * State3 outputs completion message and returns "completed"
 * No transition is defined for "completed", so the state machine terminates
 
+### Example Diagram
+  ![easysm_diagram](https://github.com/user-attachments/assets/9b943a21-ecab-4288-b62f-d733bd4c0f6f)
+
+
 # Using Without ROS
 If you don't need ROS integration, you can use the DefaultStateManager:
 
