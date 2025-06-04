@@ -162,7 +162,7 @@ You can create custom state managers by inheriting from `easysm::StateManager` a
 <pre>class MyStateManager : public easysm::StateManager
 {
 public:
-    void executeFeedback(std::string executed_object_name) override {
+    void executionFeedback(std::string executed_object_name) override {
         // Custom feedback implementation
     }
     
