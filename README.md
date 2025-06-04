@@ -67,8 +67,8 @@ public:
 
 ### Setting Up Transitions
 Transitions connect states and are triggered by specific event strings:
-<pre>auto stateA = std::make_shared<StateA>();
-auto stateB = std::make_shared<StateB>();
+<pre>auto stateA = std::make_shared&lt;StateA&gt;();
+auto stateB = std::make_shared&lt;StateB&gt;();
 
 // Create a transition from stateA to stateB that triggers on "next" event
 auto transition = std::make_shared&lt;easysm::Transition&gt;(
