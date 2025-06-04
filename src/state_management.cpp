@@ -8,7 +8,7 @@ namespace easysm
     DefaultStateManager::~DefaultStateManager() {
     }
     
-    void DefaultStateManager::executeFeedback(std::string executed_object_name) {
+    void DefaultStateManager::executionFeedback(std::string executed_object_name) {
         if (logging) {
             std::cout << "Executed: " << executed_object_name << std::endl;
         }
@@ -29,7 +29,7 @@ namespace easysm
     RosStateManager::~RosStateManager() {
     }
     
-    void RosStateManager::executeFeedback(std::string executed_object_name) {
+    void RosStateManager::executionFeedback(std::string executed_object_name) {
         std_msgs::String msg;
         msg.data = "executed:" + executed_object_name;
         feedback_publisher.publish(msg);

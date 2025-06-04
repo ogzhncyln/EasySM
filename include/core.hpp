@@ -24,7 +24,7 @@ namespace easysm
             bool checkStateExists(std::string state_name); // Checks if a state exists
             bool checkTransitionExists(std::string transition_name); // Checks if a transition exists
 
-            virtual void executeFeedback(std::string executed_object_name) = 0; // Pure virtual function to be implemented by derived classes, called after executing a state or transition
+            virtual void executionFeedback(std::string executed_object_name) = 0; // Pure virtual function to be implemented by derived classes, called after executing a state or transition
             virtual void executionLoopTerminated() = 0; // Pure virtual function to be implemented by derived classes, called when the execution loop is terminated
 
             std::shared_ptr<State> getState(std::string state_name); // Returns a shared pointer to the state with the given name

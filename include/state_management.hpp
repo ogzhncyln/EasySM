@@ -16,7 +16,7 @@ namespace easysm
             DefaultStateManager(bool logging = false);
             ~DefaultStateManager();
 
-            void executeFeedback(std::string executed_object_name) override;
+            void executionFeedback(std::string executed_object_name) override;
             void executionLoopTerminated() override;
 
         private:
@@ -30,7 +30,7 @@ namespace easysm
             RosStateManager(ros::NodeHandle& nh,std::string topic_name);
             ~RosStateManager();
 
-            void executeFeedback(std::string executed_object_name) override;
+            void executionFeedback(std::string executed_object_name) override;
             void executionLoopTerminated() override;
 
         private:

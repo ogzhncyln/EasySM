@@ -111,7 +111,7 @@ namespace easysm
 
     void State::execute() 
     {
-        state_manager->executeFeedback(name); 
+        state_manager->executionFeedback(name); 
         std::string event = onExecute(); 
         std::shared_ptr<Transition> transition = getTransitionFromEvent(event);
 
@@ -159,7 +159,7 @@ namespace easysm
 
     void Transition::execute() 
     {
-        state_manager->executeFeedback(name);
+        state_manager->executionFeedback(name);
         target_state->execute(); 
     }
 
