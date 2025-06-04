@@ -1,5 +1,5 @@
 # EasySM
-EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS (Robot Operating System) integration.
+EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS integration.
 
 # Installation
 
@@ -67,11 +67,11 @@ public:
 
 ### Setting Up Transitions
 Transitions connect states and are triggered by specific event strings:
-<pre>auto stateA = std::make_shared<StateA>();
-auto stateB = std::make_shared<StateB>();
+<pre>auto stateA = std::make_shared&lt;StateA&gt;();
+auto stateB = std::make_shared&lt;StateB&gt;();
 
 // Create a transition from stateA to stateB that triggers on "next" event
-auto transition = std::make_shared<easysm::Transition>(
+auto transition = std::make_shared&lt;easysm::Transition&gt;(
     "TransitionName",  // Transition name
     "next",           // Trigger event
     stateA,           // Source state
@@ -81,10 +81,10 @@ auto transition = std::make_shared<easysm::Transition>(
 ### Using Parameters
 Parameters can be shared between states:
 <pre>// Add a parameter
-sm->addParam<int>("my_param", 0);
+sm->addParam&lt;int&gt;("my_param", 0);
 
 // In a state, retrieve and modify the parameter
-auto param = state_manager->getParam<int>("my_param");</pre>
+auto param = state_manager->getParam&lt;int&gt;("my_param");</pre>
 
 ### Complete Example Explanation
 Let's analyze the provided example in `example.cpp`:
@@ -95,20 +95,20 @@ Let's analyze the provided example in `example.cpp`:
     ros::NodeHandle nh;
 
     // Create a ROS-enabled state manager
-    auto sm = std::make_shared<easysm::RosStateManager>(nh,"/execute_feedback");
+    auto sm = std::make_shared&lt;easysm::RosStateManager&gt;(nh,"/execute_feedback");
     
     // Create three states
-    auto state1 = std::make_shared<State1>();
-    auto state2 = std::make_shared<State2>();
-    auto state3 = std::make_shared<State3>();
+    auto state1 = std::make_shared&lt;State1&gt;();
+    auto state2 = std::make_shared&lt;State2&gt;();
+    auto state3 = std::make_shared&lt;State3&gt;();
     
     // Create transitions between states
-    auto transition1 = std::make_shared<easysm::Transition>("Transition1", "added", state1, state2);
-    auto transition2 = std::make_shared<easysm::Transition>("Transition2", "continue", state2, state1);
-    auto transition3 = std::make_shared<easysm::Transition>("Transition3", "stop", state2, state3);
+    auto transition1 = std::make_shared&lt;easysm::Transition&gt;("Transition1", "added", state1, state2);
+    auto transition2 = std::make_shared&lt;easysm::Transition&gt;("Transition2", "continue", state2, state1);
+    auto transition3 = std::make_shared&lt;easysm::Transition&gt;("Transition3", "stop", state2, state3);
     
     // Add a parameter that will be shared between states
-    sm->addParam<int>("my_param", 0);
+    sm->addParam&lt;int&gt;("my_param", 0);
     
     // Register states with the manager
     sm->addState(state1);
@@ -153,7 +153,7 @@ If you don't need ROS integration, you can use the DefaultStateManager:
 
 The rest of the code remains the same.
 
-``` auto sm = std::make_shared<easysm::DefaultStateManager>(true);   // true enables logging ```
+<pre>auto sm = std::make_shared&lt;easysm::DefaultStateManager&gt;(true);   // true enables logging </pre>
 
 # Advanced Usage
 Custom State Managers
