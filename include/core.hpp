@@ -9,14 +9,25 @@ namespace easysm
     class State;
     class Transition;
 
-    class StateManager : public std::enable_shared_from_this<StateManager> 
+    class StateManager 
     {
         public:
             StateManager();
             ~StateManager();
 
             void addState(std::shared_ptr<State> state); // Adds a state to the manager
+
+            template <typename T, typename... Args>
+            void addState(Args&&... args)
+            {
+                static_assert(std::is_base_of<State, T>::value, "T must derive from State");
+
+                auto instance = std::make_shared<T>(std::forward<Args>(args)...);
+                states.push_back(instance);
+            }
+
             void addTransition(std::shared_ptr<Transition> transition); // Adds a transition to the manager
+            void addTransition(std::string transition_name,std::string trigger_event,std::string source_state,std::string target_state); // Adds a transition to the manager
 
             void executeState(std::string state_name); // Executes the state with the given name
             void executeTransition(std::string transition_name); // Executes the transition with the given name
@@ -24,8 +35,18 @@ namespace easysm
             bool checkStateExists(std::string state_name); // Checks if a state exists
             bool checkTransitionExists(std::string transition_name); // Checks if a transition exists
 
-            virtual void executionFeedback(std::string executed_object_name) = 0; // Pure virtual function to be implemented by derived classes, called after executing a state or transition
-            virtual void executionLoopTerminated() = 0; // Pure virtual function to be implemented by derived classes, called when the execution loop is terminated
+            virtual void executionFeedback(std::string executed_object_name)
+            {
+            }
+
+            virtual void executionLoopTerminated()
+            {
+            }
+
+            virtual void logFeedback(std::string state_name,std::string log_type,std::string data)
+            {
+            }
+            
 
             std::shared_ptr<State> getState(std::string state_name); // Returns a shared pointer to the state with the given name
             std::shared_ptr<Transition> getTransition(std::string transition_name); // Returns a shared pointer to the transition with the given name
@@ -35,6 +56,19 @@ namespace easysm
 
             template <typename T> 
             std::shared_ptr<T> getParam(const std::string& name); // Retrieves an object from the container with the given name
+
+            template <typename T, typename... Args>
+            static std::shared_ptr<StateManager> create(Args&&... args)
+            {
+                if (!state_manager)
+                {
+                    state_manager = std::make_shared<T>(std::forward<Args>(args)...);
+                }
+
+                return state_manager;
+            }
+            
+            static std::shared_ptr<StateManager> state_manager; // Static shared pointer to the StateManager instance, can be used for global access
 
         private:
             std::vector<std::shared_ptr<State>> states; // List of all states
@@ -56,7 +90,10 @@ namespace easysm
             // Add this method to allow adding transitions
             void addTransition(std::shared_ptr<Transition> transition);
 
-            std::shared_ptr<StateManager> state_manager; // Pointer to the StateManager for accessing states and transitions
+            void log(std::string log);
+            void log_err(std::string log);
+            void log_warn(std::string log);
+
 
         private: 
             std::string name;   // State name
@@ -77,7 +114,6 @@ namespace easysm
 
             void initialize(); // Method to set up connections after construction
 
-            std::shared_ptr<StateManager> state_manager; // Pointer to the StateManager for accessing states and transitions
         
         private:
 

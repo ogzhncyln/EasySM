@@ -19,6 +19,28 @@ namespace easysm
             std::cout << "Execution loop terminated" << std::endl;
         }
     }
+
+    void DefaultStateManager::logFeedback(std::string state_name, std::string log_type, std::string data) {
+        if (logging) 
+        {
+            if(log_type == "log") 
+            {
+                std::cout << "[" << state_name << "] " << data << std::endl;
+            } 
+            else if (log_type == "log_error")
+            {
+                std::cerr << "[" << state_name << "] " << data << std::endl;
+            } 
+            else if (log_type == "log_warn") 
+            {
+                std::cerr << "[" << state_name << "] " << data << std::endl;
+            } 
+            else 
+            {
+                std::cout << "[" << state_name << "] " << data << std::endl;
+            }
+        }
+    }
     
 #ifdef USE_ROS
     RosStateManager::RosStateManager(ros::NodeHandle& nh, std::string topic_name) {
@@ -41,5 +63,12 @@ namespace easysm
         msg.data = "terminated";
         feedback_publisher.publish(msg);
     }
+
+    void RosStateManager::logFeedback(std::string state_name, std::string log_type, std::string data) {
+        std_msgs::String msg;
+        msg.data = "logging:" + state_name + ":" + log_type + ":" + data;
+        feedback_publisher.publish(msg);
+    }
+
 #endif
 }

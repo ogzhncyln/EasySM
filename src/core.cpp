@@ -13,12 +13,13 @@ namespace easysm
 
     }
 
+    std::shared_ptr<StateManager> StateManager::state_manager = nullptr;
+
     void StateManager::addState(std::shared_ptr<State> state) 
     {
         if(!checkStateExists(state->getName())) 
         {
             states.push_back(state);
-            state->state_manager = shared_from_this(); 
             return;
         }
 
@@ -29,12 +30,28 @@ namespace easysm
         if(!checkTransitionExists(transition->getName())) 
         {
             transitions.push_back(transition);
-            transition->state_manager = shared_from_this(); 
             transition->initialize(); 
             return;
         }
 
     }
+
+    void StateManager::addTransition(std::string transition_name,std::string trigger_event,std::string source_state,std::string target_state)
+    {
+        if(!checkTransitionExists(transition_name)) 
+        {
+            auto source = getState(source_state);
+            auto target = getState(target_state);
+            if (source && target)
+            {
+                auto transition = std::make_shared<easysm::Transition>(transition_name, trigger_event, source, target);
+                transitions.push_back(transition);
+                transition->initialize(); 
+                return;
+            }
+        }
+    }
+
 
     void StateManager::executeState(std::string state_name) 
     {
@@ -111,7 +128,7 @@ namespace easysm
 
     void State::execute() 
     {
-        state_manager->executionFeedback(name); 
+        StateManager::state_manager->executionFeedback(name); 
         std::string event = onExecute(); 
         std::shared_ptr<Transition> transition = getTransitionFromEvent(event);
 
@@ -121,7 +138,7 @@ namespace easysm
         }
         else
         {
-            state_manager->executionLoopTerminated();
+            StateManager::state_manager->executionLoopTerminated();
         }
 
     }
@@ -146,6 +163,21 @@ namespace easysm
         return name;
     }
 
+    void State::log(std::string log) 
+    {
+        StateManager::state_manager->logFeedback(name,"log",log);
+    }
+
+    void State::log_err(std::string log) 
+    {
+        StateManager::state_manager->logFeedback(name,"log_error",log);
+    }
+
+    void State::log_warn(std::string log) 
+    {
+        StateManager::state_manager->logFeedback(name,"log_warning",log);
+    }
+
     Transition::Transition(std::string name, std::string trigger, std::shared_ptr<State> source_state, std::shared_ptr<State> target_state) 
         : name(name), trigger(trigger), source_state(source_state), target_state(target_state) 
     {
@@ -159,7 +191,7 @@ namespace easysm
 
     void Transition::execute() 
     {
-        state_manager->executionFeedback(name);
+        StateManager::state_manager->executionFeedback(name);
         target_state->execute(); 
     }
 
@@ -177,4 +209,5 @@ namespace easysm
     {
         return trigger;
     }
+
 }

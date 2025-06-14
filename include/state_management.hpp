@@ -18,6 +18,7 @@ namespace easysm
 
             void executionFeedback(std::string executed_object_name) override;
             void executionLoopTerminated() override;
+            void logFeedback(std::string state_name, std::string log_type, std::string data) override;
 
         private:
             bool logging = false;
@@ -32,6 +33,7 @@ namespace easysm
 
             void executionFeedback(std::string executed_object_name) override;
             void executionLoopTerminated() override;
+            void logFeedback(std::string state_name, std::string log_type, std::string data) override;
 
         private:
             ros::Publisher feedback_publisher;
