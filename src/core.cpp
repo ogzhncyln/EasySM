@@ -57,7 +57,7 @@ namespace easysm
     {
         for (const auto& state : states) {
             if (state->getName() == state_name) {
-                state->execute();
+                state->execute(nullptr);
                 return;
             }
         }
@@ -116,6 +116,16 @@ namespace easysm
     template void StateManager::addParam<std::vector<int>>(const std::string&, std::vector<int>);
     template std::shared_ptr<std::vector<int>> StateManager::getParam<std::vector<int>>(const std::string&);
 
+    void StateManager::removeParam(const std::string& name) 
+    {
+        for (auto it = container.begin(); it != container.end(); ++it) {
+            if (it->first == name) {
+                container.erase(it);
+                return;
+            }
+        }
+    }
+
     State::State(std::string name) : name(name)
     {
 
@@ -123,18 +133,18 @@ namespace easysm
 
     State::~State() 
     {
-
+                 
     }
 
-    void State::execute() 
+    void State::execute(std::shared_ptr<Transition> transition) 
     {
         StateManager::state_manager->executionFeedback(name); 
-        std::string event = onExecute(); 
-        std::shared_ptr<Transition> transition = getTransitionFromEvent(event);
+        std::string event = onExecute(transition); // Burda patlıyor
+        std::shared_ptr<Transition> child_transition = getTransitionFromEvent(event);
 
-        if (transition) 
+        if (child_transition) 
         {
-            transition->execute();
+            child_transition->execute();
         }
         else
         {
@@ -192,7 +202,7 @@ namespace easysm
     void Transition::execute() 
     {
         StateManager::state_manager->executionFeedback(name);
-        target_state->execute(); 
+        target_state->execute(this->shared_from_this());
     }
 
     void Transition::initialize()

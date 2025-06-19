@@ -1,4 +1,5 @@
 # EasySM
+
 EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS integration.
 
 ## Installation
@@ -55,10 +56,10 @@ EasySM implements a state machine architecture with the following key components
 * **StateManager**: Manages the states and transitions
 
 ## Basic Usage
-Understanding the State Machine Model
+### Understanding the State Machine Model
 In EasySM, the state machine workflow follows these principles:
 
-1. States are created by inheriting from the [`easysm::State`](easysm_lib/include/core.hpp ) class
+1. States are created by inheriting from the `easysm::State` class
 2. Transitions connect states and are triggered by specific events
 3. When a state executes, it returns an event string
 4. The event triggers a transition to the next state
@@ -76,7 +77,7 @@ auto sm = easysm::StateManager::create<easysm::RosStateManager>(nh, "/execute_fe
 ```
 
 ### Creating Custom States
-States are created by inheriting from the [`easysm::State`](easysm_lib/include/core.hpp ) class and implementing the [`onExecute()`](/home/oguzhan/crab_ws/src/easysm_test/src/main.cpp ) method:
+States are created by inheriting from the `easysm::State` class and implementing the [`onExecute()`](/home/oguzhan/crab_ws/src/easysm_test/src/main.cpp ) method:
 
 ```cpp
 class MyState : public easysm::State 
@@ -84,7 +85,12 @@ class MyState : public easysm::State
 public:
     MyState(std::string state_name) : easysm::State(state_name) {}
     
-    std::string onExecute() override {
+    std::string onExecute(std::shared_ptr<Transition> transition) override {
+        // Check if state was called by a transition
+        if(transition) {
+            std::cout << "Transition that called this state: " << transition->getName() << std::endl;
+        }
+        
         // Your state logic here
         
         // Log information if needed
@@ -140,7 +146,7 @@ auto param = easysm::StateManager::state_manager->getParam<int>("my_param");
 ```
 
 ### Complete Example
-Here's a complete example demonstrating EasySM (similar to example.cpp):
+Here's a complete example demonstrating EasySM:
 
 ```cpp
 #include <core.hpp> 
@@ -148,16 +154,21 @@ Here's a complete example demonstrating EasySM (similar to example.cpp):
 #include <iostream>
 #include <vector>
 
+using namespace easysm;
+
 // Define a state that increments a parameter
-class State1 : public easysm::State 
+class State1 : public State 
 {
     public:
-        State1(std::string name) : easysm::State(name) {}
+        State1(std::string name) : State(name) {}
 
-        std::string onExecute() override 
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
         {
+            if(transition)
+                std::cout << "State1 executor transition -> " << transition->getName() << std::endl;
+                
             // Get the parameter "my_param" from the state manager
-            auto int_param = easysm::StateManager::state_manager->getParam<int>("my_param");
+            auto int_param = StateManager::state_manager->getParam<int>("my_param");
             *int_param += 1;
 
             log_warn("running...");
@@ -167,14 +178,17 @@ class State1 : public easysm::State
 };
 
 // Define a state that checks the parameter value
-class State2 : public easysm::State 
+class State2 : public State 
 {
     public:
-        State2(std::string name) : easysm::State(name) {}
+        State2(std::string name) : State(name) {}
 
-        std::string onExecute() override 
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
         {
-            auto int_param = easysm::StateManager::state_manager->getParam<int>("my_param");
+            if(transition)
+                std::cout << "State2 executor transition -> " << transition->getName() << std::endl;
+                
+            auto int_param = StateManager::state_manager->getParam<int>("my_param");
             log("Current value of 'my_param' -> " + std::to_string(*int_param));
 
             if(*int_param > 5) 
@@ -189,13 +203,16 @@ class State2 : public easysm::State
 };
 
 // Define a state for completing the process
-class State3 : public easysm::State 
+class State3 : public State 
 {
     public:
-        State3(std::string name) : easysm::State(name) {}
+        State3(std::string name) : State(name) {}
 
-        std::string onExecute() override 
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
         {
+            if(transition)
+                std::cout << "State3 executor transition -> " << transition->getName() << std::endl;
+                
             log("Process completed.");
 
             return "completed";
@@ -209,10 +226,10 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     // Create or get state manager instance with ROS
-    auto sm = easysm::StateManager::create<easysm::RosStateManager>(nh, "/execute_feedback");
+    auto sm = StateManager::create<RosStateManager>(nh, "/execute_feedback");
 #else
     // Create or get state manager instance without ROS
-    auto sm = easysm::StateManager::create<easysm::DefaultStateManager>(true);
+    auto sm = StateManager::create<DefaultStateManager>(true);
 #endif
 
     // Add states to the state manager
@@ -240,7 +257,6 @@ int main(int argc, char** argv)
 ```
 
 The execution flow of this example is:
-* Start at State1
 * State1 increments my_param and returns "added"
 * "added" triggers Transition1 to State2
 * State2 checks my_param value:
@@ -266,7 +282,7 @@ void log_warn(std::string message); // Warning log message
 These methods will be handled by the state manager's logFeedback method, which will output appropriately based on the manager type.
 
 ### Custom State Managers
-You can create custom state managers by inheriting from [`easysm::StateManager`](easysm_lib/include/core.hpp ) and implementing the required virtual methods:
+You can create custom state managers by inheriting from `easysm::StateManager` and implementing the required virtual methods:
 
 ```cpp
 class MyStateManager : public easysm::StateManager

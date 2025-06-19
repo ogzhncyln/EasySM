@@ -53,9 +53,11 @@ namespace easysm
 
             template <typename T> 
             void addParam(const std::string& name, T object); // Adds an object to the container with the given name
-
+            
             template <typename T> 
             std::shared_ptr<T> getParam(const std::string& name); // Retrieves an object from the container with the given name
+
+            void removeParam(const std::string& name); // Removes an object from the container with the given name
 
             template <typename T, typename... Args>
             static std::shared_ptr<StateManager> create(Args&&... args)
@@ -82,8 +84,9 @@ namespace easysm
             State(std::string name);
             ~State();
             std::shared_ptr<Transition> getTransitionFromEvent(std::string event); // Returns a transition based on the event
-            void execute(); // Executes the state logic, calls onExecute
-            virtual std::string onExecute() = 0;   // Pure virtual function to be implemented by derived classes
+            void execute(std::shared_ptr<Transition> transition=nullptr); // Executes the state logic, calls onExecute
+
+            virtual std::string onExecute(std::shared_ptr<Transition> transition) = 0;   // Pure virtual function to be implemented by derived classes
 
             std::string getName() const; // Returns the name of the state
             
