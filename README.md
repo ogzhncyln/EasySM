@@ -143,6 +143,9 @@ sm->addParam<int>("my_param", 0);
 // In a state, retrieve and modify the parameter
 auto param = easysm::StateManager::state_manager->getParam<int>("my_param");
 *param += 1;
+
+// Remove the parameter
+sm->removeParam("my_param");
 ```
 
 ### Complete Example
