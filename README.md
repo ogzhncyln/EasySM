@@ -154,8 +154,8 @@ sm->removeParam("my_param");
 Here's a complete example demonstrating EasySM:
 
 ```cpp
-#include <core.hpp> 
-#include <state_management.hpp>
+#include <easysm/core.hpp> 
+#include <easysm/state_management.hpp>
 #include <iostream>
 #include <vector>
 
