@@ -1,4 +1,6 @@
 # EasySM
+![easysm](https://github.com/user-attachments/assets/d72b760f-e9bd-4885-9c51-770b0b400958)
+
 
 EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS integration.
 
