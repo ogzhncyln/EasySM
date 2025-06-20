@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <core.hpp>
+#include <easysm/core.hpp>
 
 #ifdef USE_ROS
 #include <ros/ros.h>
