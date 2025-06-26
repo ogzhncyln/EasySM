@@ -1,5 +1,6 @@
 #include <easysm/core.hpp>
 #include <boost/smart_ptr/enable_shared_from_this.hpp>
+#include <fstream>
 
 namespace easysm
 {
@@ -14,6 +15,46 @@ namespace easysm
     }
 
     std::shared_ptr<StateManager> StateManager::state_manager = nullptr;
+
+    void StateManager::saveTree(const std::string& file_path, const std::string& file_name) 
+    {
+        if (!state_manager) {
+            return; // No state manager instance available
+        }
+
+        // Create the complete file path with .easysm_tree extension
+        std::string full_path = file_path;
+        if (!full_path.empty() && full_path.back() != '/') {
+            full_path += "/";
+        }
+        full_path += file_name + ".easysm_tree";
+        
+        // Open file for writing (will overwrite if exists, create if doesn't exist)
+        std::ofstream file(full_path);
+        
+        if (!file.is_open()) {
+            return; // Could not open file for writing
+        }
+        
+        // Write all states
+        for (const auto& state : state_manager->states) {
+            file << "node//" << state->getName() << "//400//400\n";
+        }
+        
+        // Write all transitions
+        for (const auto& transition : state_manager->transitions) {
+            auto source_state = transition->getSourceState();
+            auto target_state = transition->getTargetState();
+            
+            if (source_state && target_state) {
+                file << "transition//" << transition->getName() 
+                     << "//" << source_state->getName() 
+                     << "//" << target_state->getName() << "\n";
+            }
+        }
+        
+        file.close();
+    }
 
     void StateManager::addState(std::shared_ptr<State> state) 
     {
@@ -55,6 +96,7 @@ namespace easysm
 
     void StateManager::executeState(std::string state_name) 
     {
+        executionLoopBegin();
         for (const auto& state : states) {
             if (state->getName() == state_name) {
                 state->execute(nullptr);
@@ -185,7 +227,7 @@ namespace easysm
 
     void State::log_warn(std::string log) 
     {
-        StateManager::state_manager->logFeedback(name,"log_warning",log);
+        StateManager::state_manager->logFeedback(name,"log_warn",log);
     }
 
     Transition::Transition(std::string name, std::string trigger, std::shared_ptr<State> source_state, std::shared_ptr<State> target_state) 
@@ -218,6 +260,16 @@ namespace easysm
     std::string Transition::getTrigger() const 
     {
         return trigger;
+    }
+
+    std::shared_ptr<State> Transition::getSourceState() const 
+    {
+        return source_state;
+    }
+
+    std::shared_ptr<State> Transition::getTargetState() const 
+    {
+        return target_state;
     }
 
 }

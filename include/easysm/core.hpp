@@ -39,6 +39,10 @@ namespace easysm
             {
             }
 
+            virtual void executionLoopBegin()
+            {
+            }
+
             virtual void executionLoopTerminated()
             {
             }
@@ -69,9 +73,12 @@ namespace easysm
 
                 return state_manager;
             }
+
+            static void saveTree(const std::string& file_path, const std::string& file_name); // Saves the state tree to a file
             
             static std::shared_ptr<StateManager> state_manager; // Static shared pointer to the StateManager instance, can be used for global access
 
+            
         private:
             std::vector<std::shared_ptr<State>> states; // List of all states
             std::vector<std::shared_ptr<Transition>> transitions; // List of all transitions
@@ -114,6 +121,8 @@ namespace easysm
 
             std::string getName() const; // Returns the name of the transition
             std::string getTrigger() const; // Returns the trigger condition for the transition
+            std::shared_ptr<State> getSourceState() const; // Returns the source state
+            std::shared_ptr<State> getTargetState() const; // Returns the target state
 
             void initialize(); // Method to set up connections after construction
 

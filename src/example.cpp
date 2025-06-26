@@ -2,6 +2,7 @@
 #include <easysm/state_management.hpp>
 #include <iostream>
 #include <vector>
+#include <ros/ros.h>
 
 using namespace easysm;
 
@@ -19,6 +20,9 @@ class State1 : public State
             // Get the parameter "my_param" from the state manager
             auto int_param = StateManager::state_manager->getParam<int>("my_param");
             *int_param += 1;
+
+            // Wait for 1 second using ROS
+            ros::Duration(1.0).sleep();
 
             log_warn("running...");
 
@@ -39,6 +43,7 @@ class State2 : public State
 
             auto int_param = StateManager::state_manager->getParam<int>("my_param");
             log("Current value of 'my_param' -> " + std::to_string(*int_param));
+            ros::Duration(1.0).sleep();
 
             if(*int_param > 5) 
             {
@@ -75,7 +80,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
 
     // Create or get state manager instance
-    auto sm = StateManager::create<RosStateManager>(nh, "/execute_feedback");
+    auto sm = StateManager::create<RosStateManager>(nh, "/monitor_cmd");
 
     // Add states to the state manager
     sm->addState<State1>("State1");
@@ -89,6 +94,8 @@ int main(int argc, char** argv)
     
     // Add a parameter to the state manager
     sm->addParam<int>("my_param", 0);
+
+    //sm->saveTree("/home/usr/", "example_tree");
     
     // Execute machine from State1
     sm->executeState("State1");

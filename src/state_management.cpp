@@ -20,6 +20,12 @@ namespace easysm
         }
     }
 
+    void DefaultStateManager::executionLoopBegin() {
+        if (logging) {
+            std::cout << "Execution loop started" << std::endl;
+        }
+    }
+
     void DefaultStateManager::logFeedback(std::string state_name, std::string log_type, std::string data) {
         if (logging) 
         {
@@ -53,7 +59,7 @@ namespace easysm
     
     void RosStateManager::executionFeedback(std::string executed_object_name) {
         std_msgs::String msg;
-        msg.data = "executed:" + executed_object_name;
+        msg.data = "exec//" + executed_object_name;
         feedback_publisher.publish(msg);
 
     }
@@ -64,9 +70,15 @@ namespace easysm
         feedback_publisher.publish(msg);
     }
 
+    void RosStateManager::executionLoopBegin() {
+        std_msgs::String msg;
+        msg.data = "clear";
+        feedback_publisher.publish(msg);
+    }
+
     void RosStateManager::logFeedback(std::string state_name, std::string log_type, std::string data) {
         std_msgs::String msg;
-        msg.data = "logging:" + state_name + ":" + log_type + ":" + data;
+        msg.data = "log//" + log_type + "//" + data + "//" + state_name;
         feedback_publisher.publish(msg);
     }
 
