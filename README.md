@@ -202,7 +202,7 @@ public:
     }
 
     void executionLoopBegin() override {
-        // Custom termination handling
+        // Custom begin handling
     }
     
     void executionLoopTerminated() override {
