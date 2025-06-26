@@ -1,6 +1,7 @@
 # EasySM
 ![easysm](https://github.com/user-attachments/assets/d72b760f-e9bd-4885-9c51-770b0b400958)
 
+
 EasySM is a simple state management library for C++ applications that provides a flexible framework for implementing state machines. It supports both standalone operation and ROS integration.
 
 ## Installation
@@ -60,11 +61,11 @@ EasySM implements a state machine architecture with the following key components
 ### Understanding the State Machine Model
 In EasySM, the state machine workflow follows these principles:
 
-1. States are created by inheriting from the `easysm::State` class.
-2. Transitions connect states and are triggered by specific events.
-3. When a state executes, it returns an event string.
-4. The event triggers a transition to the next state.
-5. The process continues until a state returns an event with no matching transition.
+1. States are created by inheriting from the `easysm::State` class
+2. Transitions connect states and are triggered by specific events
+3. When a state executes, it returns an event string
+4. The event triggers a transition to the next state
+5. The process continues until a state returns an event with no matching transition
 
 ### Creating the State Manager
 EasySM provides a static creation method to easily create and access your state manager:
@@ -78,7 +79,7 @@ auto sm = easysm::StateManager::create<easysm::RosStateManager>(nh, "/execute_fe
 ```
 
 ### Creating Custom States
-States are created by inheriting from the `easysm::State` class and implementing the `onExecute()` method:
+States are created by inheriting from the `easysm::State` class and implementing the [`onExecute()`](/home/oguzhan/crab_ws/src/easysm_test/src/main.cpp ) method:
 
 ```cpp
 class MyState : public easysm::State 
@@ -149,149 +150,64 @@ auto param = easysm::StateManager::state_manager->getParam<int>("my_param");
 sm->removeParam("my_param");
 ```
 
-### Saving the State Tree
-EasySM allows saving the state machine structure to a file for visualization or debugging:
-
-```cpp
-sm->saveTree("/path/to/directory", "state_machine");
-```
-
 ### Complete Example
 Here's a complete example demonstrating EasySM:
 
-```cpp
-#include <easysm/core.hpp> 
-#include <easysm/state_management.hpp>
-#include <iostream>
-#include <vector>
-#include <ros/ros.h>
+The example code is located in the [`example.cpp`](src/example.cpp) file. It showcases the usage of EasySM with ROS integration. Below is an overview of the example:
 
-using namespace easysm;
+#### Workflow
+1. **State1**: Increments a parameter `my_param` and returns the event `"added"`.
+2. **State2**: Checks the value of `my_param`:
+   - If `my_param <= 5`: Returns `"continue"`, triggering a transition back to **State1**.
+   - If `my_param > 5`: Returns `"stop"`, triggering a transition to **State3**.
+3. **State3**: Outputs a completion message and returns `"completed"`. Since no transition is defined for `"completed"`, the state machine terminates.
 
-// Define a state that increments a parameter
-class State1 : public State 
-{
-    public:
-        State1(std::string name) : State(name) {}
-
-        std::string onExecute(std::shared_ptr<Transition> transition) override 
-        {
-            if(transition)
-                std::cout << "State1 executor transition -> " << transition->getName() << std::endl;
-
-            // Get the parameter "my_param" from the state manager
-            auto int_param = StateManager::state_manager->getParam<int>("my_param");
-            *int_param += 1;
-
-            // Wait for 1 second using ROS
-            ros::Duration(1.0).sleep();
-
-            log_warn("running...");
-
-            return "added";
-        }
-};
-
-// Define a state that checks the parameter value
-class State2 : public State 
-{
-    public:
-        State2(std::string name) : State(name) {}
-
-        std::string onExecute(std::shared_ptr<Transition> transition) override 
-        {
-            if(transition)
-                std::cout << "State2 executor transition -> " << transition->getName() << std::endl;
-
-            auto int_param = StateManager::state_manager->getParam<int>("my_param");
-            log("Current value of 'my_param' -> " + std::to_string(*int_param));
-            ros::Duration(1.0).sleep();
-
-            if(*int_param > 5) 
-            {
-                return "stop";
-            }
-            else
-            {
-                return "continue";
-            }
-        }
-};
-
-// Define a state for completing the process
-class State3 : public State 
-{
-    public:
-        State3(std::string name) : State(name) {}
-
-        std::string onExecute(std::shared_ptr<Transition> transition) override 
-        {
-            if(transition)
-                std::cout << "State3 executor transition -> " << transition->getName() << std::endl;
-
-            log("Process completed.");
-
-            return "completed";
-        }
-};
-
-
-int main(int argc, char** argv) 
-{
-    ros::init(argc, argv, "state_manager_example");
-    ros::NodeHandle nh;
-
-    // Create or get state manager instance
-    auto sm = StateManager::create<RosStateManager>(nh, "/monitor_cmd");
-
-    // Add states to the state manager
-    sm->addState<State1>("State1");
-    sm->addState<State2>("State2");
-    sm->addState<State3>("State3");
-
-    // Add transitions between states to the state manager
-    sm->addTransition("Transition1", "added", "State1", "State2");
-    sm->addTransition("Transition2", "continue", "State2", "State1");
-    sm->addTransition("Transition3", "stop", "State2", "State3");
-    
-    // Add a parameter to the state manager
-    sm->addParam<int>("my_param", 0);
-
-    // Execute machine from State1
-    sm->executeState("State1");
-
-    ros::spin();
-    
-    return 0;
-}
-```
-
-#### Explanation of the Example
-This example demonstrates the use of EasySM with ROS integration. It includes three states (`State1`, `State2`, and `State3`) and transitions between them:
-
-1. **State1**:
-   - Increments the parameter `my_param`.
-   - Waits for 1 second using ROS.
-   - Returns the event `"added"`.
-
-2. **State2**:
-   - Checks the value of `my_param`.
-   - Logs the current value of `my_param`.
-   - Waits for 1 second using ROS.
-   - Returns `"continue"` if `my_param <= 5`, or `"stop"` if `my_param > 5`.
-
-3. **State3**:
-   - Logs a completion message.
-   - Returns `"completed"`.
+#### Code Highlights
+- **State1**: Implements logic to increment a parameter and log warnings.
+- **State2**: Implements logic to check the parameter value and log its state.
+- **State3**: Implements logic to log a completion message.
+- **Transitions**: Connect states based on event triggers.
+- **ROS Integration**: Uses `ros::Duration` for delays and publishes feedback to a ROS topic.
 
 #### Execution Flow
-- The state machine starts with `State1`.
-- `State1` increments `my_param` and triggers the `"added"` event, transitioning to `State2`.
-- `State2` checks the value of `my_param`:
-  - If `my_param <= 5`, it triggers the `"continue"` event, transitioning back to `State1`.
-  - If `my_param > 5`, it triggers the `"stop"` event, transitioning to `State3`.
-- `State3` logs a completion message and terminates the state machine.
+The state machine starts from **State1** and transitions between states based on the parameter value and event triggers.
 
-This example showcases how to use EasySM for state management with ROS, including parameter handling, transitions, and logging.### Complete Example
+For the full implementation, refer to the [`example.cpp`](src/example.cpp) file.
 
+### Example Diagram
+![easysm_diagram](https://github.com/user-attachments/assets/9b943a21-ecab-4288-b62f-d733bd4c0f6f)
+
+## Advanced Usage
+
+### Logging in States
+EasySM provides built-in logging methods in the State class:
+
+```cpp
+void log(std::string message);     // Normal log message
+void log_err(std::string message);  // Error log message
+void log_warn(std::string message); // Warning log message
+```
+
+These methods will be handled by the state manager's logFeedback method, which will output appropriately based on the manager type.
+
+### Custom State Managers
+You can create custom state managers by inheriting from `easysm::StateManager` and implementing the required virtual methods:
+
+```cpp
+class MyStateManager : public easysm::StateManager
+{
+public:
+    void executionFeedback(std::string executed_object_name) override {
+        // Custom feedback implementation
+    }
+    
+    void executionLoopTerminated() override {
+        // Custom termination handling
+    }
+    
+    void logFeedback(std::string state_name, std::string log_type, std::string data) override {
+        // Custom log handling
+    }
+};
+```
 
