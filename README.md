@@ -160,10 +160,11 @@ sm->saveTree("/path/to/directory", "state_machine");
 Here's a complete example demonstrating EasySM:
 
 ```cpp
-#include <core.hpp> 
-#include <state_management.hpp>
+#include <easysm/core.hpp> 
+#include <easysm/state_management.hpp>
 #include <iostream>
 #include <vector>
+#include <ros/ros.h>
 
 using namespace easysm;
 
@@ -177,10 +178,13 @@ class State1 : public State
         {
             if(transition)
                 std::cout << "State1 executor transition -> " << transition->getName() << std::endl;
-                
+
             // Get the parameter "my_param" from the state manager
             auto int_param = StateManager::state_manager->getParam<int>("my_param");
             *int_param += 1;
+
+            // Wait for 1 second using ROS
+            ros::Duration(1.0).sleep();
 
             log_warn("running...");
 
@@ -198,9 +202,10 @@ class State2 : public State
         {
             if(transition)
                 std::cout << "State2 executor transition -> " << transition->getName() << std::endl;
-                
+
             auto int_param = StateManager::state_manager->getParam<int>("my_param");
             log("Current value of 'my_param' -> " + std::to_string(*int_param));
+            ros::Duration(1.0).sleep();
 
             if(*int_param > 5) 
             {
@@ -223,25 +228,21 @@ class State3 : public State
         {
             if(transition)
                 std::cout << "State3 executor transition -> " << transition->getName() << std::endl;
-                
+
             log("Process completed.");
 
             return "completed";
         }
 };
 
+
 int main(int argc, char** argv) 
 {
-#ifdef USE_ROS
     ros::init(argc, argv, "state_manager_example");
     ros::NodeHandle nh;
 
-    // Create or get state manager instance with ROS
-    auto sm = StateManager::create<RosStateManager>(nh, "/execute_feedback");
-#else
-    // Create or get state manager instance without ROS
-    auto sm = StateManager::create<DefaultStateManager>(true);
-#endif
+    // Create or get state manager instance
+    auto sm = StateManager::create<RosStateManager>(nh, "/monitor_cmd");
 
     // Add states to the state manager
     sm->addState<State1>("State1");
@@ -255,64 +256,177 @@ int main(int argc, char** argv)
     
     // Add a parameter to the state manager
     sm->addParam<int>("my_param", 0);
-    
-    // Save the state machine structure
-    sm->saveTree("/path/to/directory", "state_machine");
-    
+
     // Execute machine from State1
     sm->executeState("State1");
 
-#ifdef USE_ROS
     ros::spin();
-#endif
     
     return 0;
 }
 ```
 
-The execution flow of this example is:
-* State1 increments my_param and returns "added".
-* "added" triggers Transition1 to State2.
-* State2 checks my_param value:
-  * If <= 5: returns "continue", triggering Transition2 back to State1.
-  * If > 5: returns "stop", triggering Transition3 to State3.
-* State3 outputs completion message and returns "completed".
-* No transition is defined for "completed", so the state machine terminates.
+#### Explanation of the Example
+This example demonstrates the use of EasySM with ROS integration. It includes three states (`State1`, `State2`, and `State3`) and transitions between them:
 
-### Example Diagram
-![easysm_diagram](https://github.com/user-attachments/assets/9b943a21-ecab-4288-b62f-d733bd4c0f6f)
+1. **State1**:
+   - Increments the parameter `my_param`.
+   - Waits for 1 second using ROS.
+   - Returns the event `"added"`.
 
-## Advanced Usage
+2. **State2**:
+   - Checks the value of `my_param`.
+   - Logs the current value of `my_param`.
+   - Waits for 1 second using ROS.
+   - Returns `"continue"` if `my_param <= 5`, or `"stop"` if `my_param > 5`.
 
-### Logging in States
-EasySM provides built-in logging methods in the State class:
+3. **State3**:
+   - Logs a completion message.
+   - Returns `"completed"`.
+
+#### Execution Flow
+- The state machine starts with `State1`.
+- `State1` increments `my_param` and triggers the `"added"` event, transitioning to `State2`.
+- `State2` checks the value of `my_param`:
+  - If `my_param <= 5`, it triggers the `"continue"` event, transitioning back to `State1`.
+  - If `my_param > 5`, it triggers the `"stop"` event, transitioning to `State3`.
+- `State3` logs a completion message and terminates the state machine.
+
+This example showcases how to use EasySM for state management with ROS, including parameter handling, transitions, and logging.### Complete Example
+Here's a complete example demonstrating EasySM:
 
 ```cpp
-void log(std::string message);     // Normal log message
-void log_err(std::string message);  // Error log message
-void log_warn(std::string message); // Warning log message
-```
+#include <easysm/core.hpp> 
+#include <easysm/state_management.hpp>
+#include <iostream>
+#include <vector>
+#include <ros/ros.h>
 
-These methods will be handled by the state manager's logFeedback method, which will output appropriately based on the manager type.
+using namespace easysm;
 
-### Custom State Managers
-You can create custom state managers by inheriting from `easysm::StateManager` and implementing the required virtual methods:
-
-```cpp
-class MyStateManager : public easysm::StateManager
+// Define a state that increments a parameter
+class State1 : public State 
 {
-public:
-    void executionFeedback(std::string executed_object_name) override {
-        // Custom feedback implementation
-    }
-    
-    void executionLoopTerminated() override {
-        // Custom termination handling
-    }
-    
-    void logFeedback(std::string state_name, std::string log_type, std::string data) override {
-        // Custom log handling
-    }
+    public:
+        State1(std::string name) : State(name) {}
+
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
+        {
+            if(transition)
+                std::cout << "State1 executor transition -> " << transition->getName() << std::endl;
+
+            // Get the parameter "my_param" from the state manager
+            auto int_param = StateManager::state_manager->getParam<int>("my_param");
+            *int_param += 1;
+
+            // Wait for 1 second using ROS
+            ros::Duration(1.0).sleep();
+
+            log_warn("running...");
+
+            return "added";
+        }
 };
+
+// Define a state that checks the parameter value
+class State2 : public State 
+{
+    public:
+        State2(std::string name) : State(name) {}
+
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
+        {
+            if(transition)
+                std::cout << "State2 executor transition -> " << transition->getName() << std::endl;
+
+            auto int_param = StateManager::state_manager->getParam<int>("my_param");
+            log("Current value of 'my_param' -> " + std::to_string(*int_param));
+            ros::Duration(1.0).sleep();
+
+            if(*int_param > 5) 
+            {
+                return "stop";
+            }
+            else
+            {
+                return "continue";
+            }
+        }
+};
+
+// Define a state for completing the process
+class State3 : public State 
+{
+    public:
+        State3(std::string name) : State(name) {}
+
+        std::string onExecute(std::shared_ptr<Transition> transition) override 
+        {
+            if(transition)
+                std::cout << "State3 executor transition -> " << transition->getName() << std::endl;
+
+            log("Process completed.");
+
+            return "completed";
+        }
+};
+
+
+int main(int argc, char** argv) 
+{
+    ros::init(argc, argv, "state_manager_example");
+    ros::NodeHandle nh;
+
+    // Create or get state manager instance
+    auto sm = StateManager::create<RosStateManager>(nh, "/monitor_cmd");
+
+    // Add states to the state manager
+    sm->addState<State1>("State1");
+    sm->addState<State2>("State2");
+    sm->addState<State3>("State3");
+
+    // Add transitions between states to the state manager
+    sm->addTransition("Transition1", "added", "State1", "State2");
+    sm->addTransition("Transition2", "continue", "State2", "State1");
+    sm->addTransition("Transition3", "stop", "State2", "State3");
+    
+    // Add a parameter to the state manager
+    sm->addParam<int>("my_param", 0);
+
+    // Execute machine from State1
+    sm->executeState("State1");
+
+    ros::spin();
+    
+    return 0;
+}
 ```
+
+#### Explanation of the Example
+This example demonstrates the use of EasySM with ROS integration. It includes three states (`State1`, `State2`, and `State3`) and transitions between them:
+
+1. **State1**:
+   - Increments the parameter `my_param`.
+   - Waits for 1 second using ROS.
+   - Returns the event `"added"`.
+
+2. **State2**:
+   - Checks the value of `my_param`.
+   - Logs the current value of `my_param`.
+   - Waits for 1 second using ROS.
+   - Returns `"continue"` if `my_param <= 5`, or `"stop"` if `my_param > 5`.
+
+3. **State3**:
+   - Logs a completion message.
+   - Returns `"completed"`.
+
+#### Execution Flow
+- The state machine starts with `State1`.
+- `State1` increments `my_param` and triggers the `"added"` event, transitioning to `State2`.
+- `State2` checks the value of `my_param`:
+  - If `my_param <= 5`, it triggers the `"continue"` event, transitioning back to `State1`.
+  - If `my_param > 5`, it triggers the `"stop"` event, transitioning to `State3`.
+- `State3` logs a completion message and terminates the state machine.
+
+This example showcases how to use EasySM for state management with ROS, including parameter handling, transitions, and logging.
 
