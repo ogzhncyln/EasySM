@@ -200,6 +200,10 @@ public:
     void executionFeedback(std::string executed_object_name) override {
         // Custom feedback implementation
     }
+
+    void executionLoopBegin() override {
+        // Custom termination handling
+    }
     
     void executionLoopTerminated() override {
         // Custom termination handling
